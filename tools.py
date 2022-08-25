@@ -126,6 +126,15 @@ class Mines:
                         grid[y_pos][x_pos] += 1
         return grid
 
+def convertor(x, y):
+    n = 0.5*(x+y)*(x+y+1)+y
+    return str(n)
+print(convertor(12,13))
+    
+
+    
+    
+
 
 
 
