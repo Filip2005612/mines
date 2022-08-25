@@ -1,6 +1,7 @@
 from html.entities import name2codepoint
 from turtle import xcor
 from kivy.uix.label import Label
+from kivy.uix.spinner import Spinner
 from kivy.graphics import Rectangle, Color
 import random
 n1 = [-1, 1]
@@ -22,10 +23,12 @@ neighbours.append(n7)
 neighbours.append(n8)
 def create_tile(x, y, size_x, size_y, text_, sx, sy, color):
     Color(color[0], color[1], color[2])
-    Rectangle(pos = (x*sx,y*sy), size = (sx*size_x, sy*size_y))
+    Rectangle(pos = (x*sx,y*sy), size = (sx*size_x, sy*size_y), )
     l = Label(text = text_, pos_hint = {'x':x, 'y':y}, size_hint = [size_x, size_y])
     return l
-
+def create_bar(x,y, size_x, size_y, sx, sy, color):
+    Color(color[0], color[1], color[2])
+    Rectangle(pos = (sx*x, sy*y), size = (sx*size_x, sy*size_y))
 class Grid:
     def __init__(self, x, y):
         self.x = x
@@ -40,7 +43,7 @@ class Grid:
             self.grid.append([])
             for j in range(self.x):
                 self.grid[i].append(0)
-            
+        # self.grid.reverse()
     def create_sight(self):
         for i in range(self.y):
             self.sight.append([])
@@ -76,7 +79,7 @@ class Grid:
                         
 
     def print_grid(self):
-        for i in self.sight:
+        for i in self.grid:
             print(i, '\n')
             
         
