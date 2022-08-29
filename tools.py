@@ -21,11 +21,17 @@ neighbours.append(n5)
 neighbours.append(n6)
 neighbours.append(n7)
 neighbours.append(n8)
-def create_tile(x, y, size_x, size_y, text_, sx, sy, color):
-    Color(color[0], color[1], color[2])
-    Rectangle(pos = (x*sx,y*sy), size = (sx*size_x, sy*size_y), )
+def create_tile(x, y, size_x, size_y, text_, sx, sy, color,self,image = '',):
+    
+    if image != '':
+        r = Rectangle(source = image,pos = (x*sx,y*sy), size = (sx*size_x, sy*size_y))
+    else:
+        Color(color[0], color[1], color[2])
+        r = Rectangle(pos = (x*sx,y*sy), size = (sx*size_x, sy*size_y))
     l = Label(text = text_, pos_hint = {'x':x, 'y':y}, size_hint = [size_x, size_y])
-    return l
+    self.add_widget(l)
+    return [l,r]
+
 def create_bar(x,y, size_x, size_y, sx, sy, color):
     Color(color[0], color[1], color[2])
     Rectangle(pos = (sx*x, sy*y), size = (sx*size_x, sy*size_y))
@@ -43,7 +49,7 @@ class Grid:
             self.grid.append([])
             for j in range(self.x):
                 self.grid[i].append(0)
-        # self.grid.reverse()
+        
     def create_sight(self):
         for i in range(self.y):
             self.sight.append([])
@@ -73,10 +79,17 @@ class Grid:
                         if self.grid[y_pos][x_pos] == 0:
 
                             self.cave(x_pos, y_pos)
-                        
-        
-        
-                        
+    def images(self):
+        images = []
+        for index, line in enumerate(self.grid):
+            images.append([])
+            for tile in line:
+                if tile != 'n' and tile != 'vlajka' and tile != 'mine':
+                    images[index].append(f'data/{random.randint(0,4)}.png')
+                else:
+                    images[index].append('n')
+       
+        return images
 
     def print_grid(self):
         for i in self.grid:
@@ -129,7 +142,7 @@ class Mines:
 def convertor(x, y):
     n = 0.5*(x+y)*(x+y+1)+y
     return str(n)
-print(convertor(12,13))
+
     
 
     
