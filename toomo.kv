@@ -1,18 +1,21 @@
-ScreenManager:  
+ScreenManager:
     MenuWindow:
     GameWindow:
     
-<GameWindow>
-    on_enter: root.draw()
-    name: 'GameWindow'
-    size: root.width, root.height
 <MenuWindow>
+    
     name: 'MenuWindow'
     size: root.width, root.height
+    
     Button:
         size_hint: 0.3, 0.3
         pos_hint: {'x':0.3, 'top':0.3}
         text: 'play'
-        background_color: (0,0,0,0)
+        
         on_press:
             app.root.current = 'GameWindow'
+            
+<GameWindow>
+    on_enter: root.draw()
+    name: 'GameWindow'
+    size: root.width, root.height

@@ -22,7 +22,7 @@ sc = Window.size
 sx = sc[0]
 sy = sc[1]
 
-difficulties = {'easy':[6, 11, 7], 'medium':[11, 18, 35], 'hard': [15, 25, 75] }
+difficulties = {'easy':[4, 4, 1], 'medium':[3, 3, 1], 'hard': [15, 25, 75] }
 #difficulties = {'easy':[6, 11], 'medium':[10, 18], 'hard': [16, 25] }
 #difficulties = {'easy':[4, 8], 'medium':[4, 8], 'hard': [15, 25] }
 
@@ -42,23 +42,55 @@ class P(Popup):
         
         self.caller = caller
         bx = BoxLayout()
+        self.size_hint = [0.7, 0.7]
+        self.auto_dismiss = True
+        self.on_dismiss = self.restart
+        # restart  = Button(size_hint = (0.8, 0.2), pos_hint = {'x':0.1, 'y':0.1},text ="restart", on_press = self.restart)
+        # bx.add_widget(restart)
+        
+        self.content = bx
+        self.title = 'Prehral si'
+        self.background = "data/bomba.png"
+       
+    
+    def restart(self):
+        global click_allowed
+        click_allowed = True
+        self.caller.restart()
+        
+class W(Popup):
+      def __init__(self, caller,**kwargs):
+        super().__init__(**kwargs)
+        
+        self.caller = caller
+        bx = BoxLayout()
         self.size_hint = [0.4, 0.4]
         self.auto_dismiss = False
-        restart  = Button(size_hint = (0.1, 0.1), pos_hint = {'x':0.4, 'y':0.9},text ="restrat", on_press = self.restart)
-        bx.add_widget(restart)
+      
         self.content = bx
         score = Label(text = str(GameWindow.time), pos_hint = {'x':0.1, 'y':0.5}, size_hint = [0.3, 0.3])
         bx.add_widget(score)
 
-    def restart(self, btn):
-        global click_allowed
-        click_allowed = True
-        self.dismiss()
-        self.caller.restart(btn)
+
+class MenuWindow(Screen):
+    def on_pre_enter(self, *args):
+        self.draw()
+    def draw(self):
+
+        self.clear_widgets()
+        self.canvas.clear()
+        egg  = Button(size_hint = (0.05, 0.05), pos_hint = {'x':0.14, 'y':0.78},text ="", on_press = self.egg)
+        self.add_widget(egg)
+        with self.canvas:
         
+            Rectangle(source = 'data/debili.png',pos = (sx*0,sy*1 - sy), size = (sx*1, sy*1))
+        
+    def egg(self, *args):
     
-
-
+        str = 'Natálka si pre mňa jediná \nnie si až tak lenivá \nvolejbal ťa pochitil \na ja som ťa zachytil \n \nOd Vikinky ďaleko nemáš \nale aspoň sa na nič nehráš \npre mňa niečo znamenáš \na aj ty po mne zazeráš\n\nRaz ti niečo ukážem \na pojdeme na masáže \naj keď prejdeme cez pasáže\ntak sa zase nájdeme\n\nPostavu máš nádhernú \na pre mňa perfektnú\npleť máš strašne príjemnú\nale pre niekoho mizernú\n\nDúfam, že sme si súdení\nale zase nie sme skúsení\nverím, že sme pre seba stvorení\na dúfam, že sa s tebou ožením'
+        l = Label(text = str, pos_hint = {'x':0, 'y':0.4}, size_hint = [1, 0.5],halign="left", valign="middle")
+        self.add_widget(l)
+                    
 class GameWindow(Screen):
     time = 0
     def __init__(self, **kw):
@@ -97,7 +129,16 @@ class GameWindow(Screen):
                 elif tile == 'vlajka':
                     self.rectangles[id].source = f'data/vlajka.png'
                 elif tile == 'n':
-                    pass
+                    if y %2 ==0:
+                        if x%2 == 0:
+                            self.rectangles[id].source = f'data/surface1.png'
+                        else:
+                            self.rectangles[id].source = f'data/surface2.png'
+                    else:
+                        if x%2 == 0:
+                            self.rectangles[id].source = f'data/surface2.png'
+                        else:
+                            self.rectangles[id].source = f'data/surface1.png'
                 else:
                     if tile != 0:
                         self.ids[id].text = str(tile)
@@ -116,28 +157,29 @@ class GameWindow(Screen):
         with self.canvas.before:
             
             for line in self.map.sight:
-                if (len(line)+1)%2:
-                    if c == 0:
-                        c = 1
-                    else:
-                        c = 0
+                
             
                 for tile in line:
                     ypos = 1-self.tile_size_y*y - self.size_y
-                    if c == 0:
-                        c = 1
-                    else:
-                        c = 0
+                    
                         
                     l = create_tile(start_x + self.tile_size_x*x ,start_y + ypos ,self.size_x ,self.size_y ,'',sx, sy, COLORS[0],self, image = SURFACES[c])
                     id  = convertor(x,y)
                     self.rectangles[id] = l[1]
                     self.ids[id] = l[0]
+                    if c == 0:
+                        c = 1
+                    else:
+                        c = 0
                     x  += 1
                 x = 0
                 y += 1
                 
-
+                if (len(line)+1)%2:
+                    if c == 0:
+                        c = 1
+                    else:
+                        c = 0
             create_bar(0 ,0.9, 1, 0.1,sx, sy, [0.7,0.9, 0.1])
             create_bar(0 ,0, 1, 0.1,sx, sy, [0.7,0.9, 0.1])
             vlajka = create_tile(0 ,0,0.5 ,0.1 ,'vlajocka',sx, sy, (0,1,1,0),self )
@@ -150,11 +192,11 @@ class GameWindow(Screen):
             self.ids['state'] = state[0]
             self.ids['time'] = time[0]
             self.add_widget(restart)
+          
         self.create_spinner(0.1, 0.9, 0.2, 0.1, self.current_difficulty)
-        
+    
 
-
-    def restart(self, btn):
+    def restart(self, *args):
         global first_click
         first_click = True
         Clock.unschedule(self.update)
@@ -194,12 +236,14 @@ class GameWindow(Screen):
    
     def on_touch_down(self, touch):
         super().on_touch_down(touch)
+        
         global first_click, click_allowed
         if click_allowed:
             pos  = touch.pos
             
             x = pos[0]
             y = pos[1]
+        
             y_cor = (1-y/sy) + start_y
             if first_click and self.ids.state.text != 'none':
                 if y_cor > 0 and y_cor < 0.8:
@@ -220,7 +264,7 @@ class GameWindow(Screen):
                             
                         if tile == 'mine':
                             click_allowed = False
-                            Clock.schedule_once(self.show_popup, 1)
+                            Clock.schedule_once(self.show_popup_lost, 1)
                             self.map.sight[y_pos][x_pos] = self.map.grid[y_pos][x_pos]
 
                         if tile == 'cislo':
@@ -233,12 +277,21 @@ class GameWindow(Screen):
                     x_pos = int((x/sx)/self.tile_size_x) 
                     y_pos = int(y_cor/self.tile_size_y)
                     
+                    if self.map.sight[y_pos][x_pos] == 'vlajka':
+                        self.map.sight[y_pos][x_pos] = 'n'
+                        self.flags = str(int(self.flags) + 1)
+                        self.ids.vlajky.text = self.flags
+                        self.overwrite()
                         
-                    if self.map.sight[y_pos][x_pos] == 'n':
+                    elif self.map.sight[y_pos][x_pos] == 'n':
                         self.map.sight[y_pos][x_pos] = 'vlajka'
                         self.flags = str(int(self.flags) - 1)
                         self.ids.vlajky.text = self.flags
                         self.overwrite()
+                    else:
+                        pass
+                        
+                    
                         
             if y_cor > 0.8:
                 if x/sx > 0.5:
@@ -249,17 +302,38 @@ class GameWindow(Screen):
                     
                     self.tool = 'vlajka'
                     self.ids.state.text = 'vlajka'
+        win = self.check_win()
+        if win:
+            self.show_popup_win()
 
-    def show_popup(self, d):
+    def show_popup_lost(self, d):
         show = P(self)
         show.open()
         Clock.unschedule(self.update)
+    def show_popup_win(self):
+        show = W(self)
+        show.open()
+        Clock.unschedule(self.update)
 
-class MenuWindow(Screen):
-    pass
+    def check_win(self):
+        
+        if self.flags == '0':
+            for y,line in enumerate(self.map.sight):
+                for x,tile in enumerate(line):
+                    if tile == 'vlajka':
+                        if self.map.grid[y][x] != 'mine':
+                            return False
+            return True
+        return False
+
+
+
+
+
 kv = Builder.load_file('toomo.kv')
 class Start(App):
     def build(self):
         return kv
+    
 if __name__ == "__main__":
     Start().run()
