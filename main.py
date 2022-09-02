@@ -14,7 +14,7 @@ from kivy.uix.spinner import Spinner
 from kivy.core.window import Window
 from tools import create_tile, Grid, Mines, create_bar, convertor
 from kivy.clock import Clock
-import random
+import json
 # image = f'data/{random.randint(0,4)}.png'
 Window.size = (400, 800)
 sc = Window.size
@@ -22,7 +22,7 @@ sc = Window.size
 sx = sc[0]
 sy = sc[1]
 
-difficulties = {'easy':[4, 4, 1], 'medium':[3, 3, 1], 'hard': [15, 25, 75] }
+difficulties = {'easy':[6, 11, 7], 'medium':[10, 18, 35], 'hard': [15, 25, 75] }
 #difficulties = {'easy':[6, 11], 'medium':[10, 18], 'hard': [16, 25] }
 #difficulties = {'easy':[4, 8], 'medium':[4, 8], 'hard': [15, 25] }
 
@@ -45,9 +45,6 @@ class P(Popup):
         self.size_hint = [0.7, 0.7]
         self.auto_dismiss = True
         self.on_dismiss = self.restart
-        # restart  = Button(size_hint = (0.8, 0.2), pos_hint = {'x':0.1, 'y':0.1},text ="restart", on_press = self.restart)
-        # bx.add_widget(restart)
-        
         self.content = bx
         self.title = 'Prehral si'
         self.background = "data/bomba.png"
@@ -59,18 +56,28 @@ class P(Popup):
         self.caller.restart()
         
 class W(Popup):
-      def __init__(self, caller,**kwargs):
+    def __init__(self, caller,**kwargs):
         super().__init__(**kwargs)
         
         self.caller = caller
         bx = BoxLayout()
-        self.size_hint = [0.4, 0.4]
-        self.auto_dismiss = False
-      
+        self.title = 'Vyhral si'
+        self.background = 'data/bomba.png'
+        self.size_hint = [0.7, 0.7]
         self.content = bx
-        score = Label(text = str(GameWindow.time), pos_hint = {'x':0.1, 'y':0.5}, size_hint = [0.3, 0.3])
+        f = open('score.json', 'r')
+        data = json.load(f)
+        f.close()
+        self.on_dismiss = self.win
+        score = Label(text = 'Tvoje skóre je: ' + str(GameWindow.time) + '\n' + 'high score je: ' + str(data[self.caller.current_difficulty]), pos_hint = {'x':0.1, 'y':0.5}, size_hint = [0.3, 0.3])
         bx.add_widget(score)
+        
 
+    def win(self):
+        f = open('score.json', 'r')
+        data = json.load(f)
+        self.caller.ids.high.text = 'high score: ' + str(data[self.caller.current_difficulty])
+        f.close()
 
 class MenuWindow(Screen):
     def on_pre_enter(self, *args):
@@ -81,15 +88,23 @@ class MenuWindow(Screen):
         self.canvas.clear()
         egg  = Button(size_hint = (0.05, 0.05), pos_hint = {'x':0.14, 'y':0.78},text ="", on_press = self.egg)
         self.add_widget(egg)
+        
+
         with self.canvas:
-        
+            
             Rectangle(source = 'data/debili.png',pos = (sx*0,sy*1 - sy), size = (sx*1, sy*1))
-        
+            l = Label(text = '', pos_hint = {'x':0, 'y':0.4}, size_hint = [1, 0.5],halign="left", valign="middle")
+            self.ids['basnicka'] = l
+            self.add_widget(l)
+
     def egg(self, *args):
-    
-        str = 'Natálka si pre mňa jediná \nnie si až tak lenivá \nvolejbal ťa pochitil \na ja som ťa zachytil \n \nOd Vikinky ďaleko nemáš \nale aspoň sa na nič nehráš \npre mňa niečo znamenáš \na aj ty po mne zazeráš\n\nRaz ti niečo ukážem \na pojdeme na masáže \naj keď prejdeme cez pasáže\ntak sa zase nájdeme\n\nPostavu máš nádhernú \na pre mňa perfektnú\npleť máš strašne príjemnú\nale pre niekoho mizernú\n\nDúfam, že sme si súdení\nale zase nie sme skúsení\nverím, že sme pre seba stvorení\na dúfam, že sa s tebou ožením'
-        l = Label(text = str, pos_hint = {'x':0, 'y':0.4}, size_hint = [1, 0.5],halign="left", valign="middle")
-        self.add_widget(l)
+       
+        if self.ids.basnicka.text == "":
+            str = 'Natálka si pre mňa jediná \nnie si až tak lenivá \nvolejbal ťa pochitil \na ja som ťa zachytil \n \nOd Vikinky ďaleko nemáš \nale aspoň sa na nič nehráš \npre mňa niečo znamenáš \na aj ty po mne zazeráš\n\nRaz ti niečo ukážem \na pojdeme na masáže \naj keď prejdeme cez pasáže\ntak sa zase nájdeme\n\nPostavu máš nádhernú \na pre mňa perfektnú\npleť máš strašne príjemnú\nale pre niekoho mizernú\n\nDúfam, že sme si súdení\nale zase nie sme skúsení\nverím, že sme pre seba stvorení\na dúfam, že sa s tebou ožením'
+            self.ids.basnicka.text = str
+            
+        else:
+            self.ids.basnicka.text = ''
                     
 class GameWindow(Screen):
     time = 0
@@ -112,11 +127,11 @@ class GameWindow(Screen):
         self.images = self.map.images()
         self.rectangles = {}
         self.flags = str(m)
-        
-
+    
     def update(self,d):
         GameWindow.time += 1
         self.ids.time.text = str(GameWindow.time)
+
     def overwrite(self):
         
         
@@ -163,7 +178,7 @@ class GameWindow(Screen):
                     ypos = 1-self.tile_size_y*y - self.size_y
                     
                         
-                    l = create_tile(start_x + self.tile_size_x*x ,start_y + ypos ,self.size_x ,self.size_y ,'',sx, sy, COLORS[0],self, image = SURFACES[c])
+                    l = create_tile(start_x + self.tile_size_x*x ,start_y + ypos ,self.size_x ,self.size_y ,'',sx, sy,self, image = SURFACES[c])
                     id  = convertor(x,y)
                     self.rectangles[id] = l[1]
                     self.ids[id] = l[0]
@@ -182,18 +197,27 @@ class GameWindow(Screen):
                         c = 0
             create_bar(0 ,0.9, 1, 0.1,sx, sy, [0.7,0.9, 0.1])
             create_bar(0 ,0, 1, 0.1,sx, sy, [0.7,0.9, 0.1])
-            vlajka = create_tile(0 ,0,0.5 ,0.1 ,'vlajocka',sx, sy, (0,1,1,0),self )
-            lopata = create_tile(0.5 ,0,0.5 ,0.1 ,'lopata',sx, sy, (0,0,1,1),self)           
-            state = create_tile(0.5 ,0.9,0.3 ,0.1 ,self.tool,sx, sy, (0,0,1,1),self)
-            restart  = Button(size_hint = (0.1, 0.1), pos_hint = {'x':0.4, 'y':0.9},text ="restrat", on_press = self.restart)
-            time = create_tile(0.8, 0.9, 0.1, 0.1, str(GameWindow.time), sx, sy, (1,0,1,0),self)
-            vlajky = create_tile(0.9 ,0.9,0.1 ,0.1 ,self.flags,sx, sy, (0,0,1,1),self)
+            
+                      
+            state = create_tile(0.35 ,0.9,0.2 ,0.1 ,self.tool,sx, sy,self, color = (0,0,1,1))
+            restart  = Button(size_hint = (0.15, 0.1), pos_hint = {'x':0.2, 'y':0.9},text ="restart",background_color = (1,0,1,1), on_press = self.restart)
+            time = create_tile(0.8, 0.9, 0.1, 0.1, str(GameWindow.time), sx, sy,self, color = (1,0,1,0))
+            vlajky = create_tile(0.9 ,0.9,0.1 ,0.1 ,self.flags,sx, sy,self, image = 'data/vlajka.png')
+            vlajka = create_tile(0 ,0,0.5 ,0.1 ,'',sx, sy,self , image= 'data/vlajka.png')
+            lopata = create_tile(0.5 ,0,0.5 ,0.1 ,'',sx, sy,self, image = 'data/lopata.png') 
+            f = open('score.json', 'r')
+            data = json.load(f)
+            f.close()
+            hihg_score = create_tile(0.55 ,0.9,0.25 ,0.1 ,'high score: ' +  str(data[self.current_difficulty]),sx, sy,self, color = (0,1,0,1))
+            
             self.ids['vlajky'] = vlajky[0]
             self.ids['state'] = state[0]
             self.ids['time'] = time[0]
+            self.ids['high'] = hihg_score[0]
             self.add_widget(restart)
+
           
-        self.create_spinner(0.1, 0.9, 0.2, 0.1, self.current_difficulty)
+        self.create_spinner(0, 0.9, 0.2, 0.1, self.current_difficulty)
     
 
     def restart(self, *args):
@@ -305,11 +329,33 @@ class GameWindow(Screen):
         win = self.check_win()
         if win:
             self.show_popup_win()
+            self.win()
+
+    def win(self):
+        f = open('score.json', 'r')
+
+        data = json.load(f)
+        f.close()
+        d = self.current_difficulty
+        score = self.time
+        if data[d] == 'n':
+            data[d] = score
+        else:
+            
+            if data[d] > score:
+                data[d] = score
+               
+        jsonFile = open("score.json", "w+")
+        jsonFile.write(json.dumps(data))
+        jsonFile.close()
+         
+
 
     def show_popup_lost(self, d):
         show = P(self)
         show.open()
         Clock.unschedule(self.update)
+
     def show_popup_win(self):
         show = W(self)
         show.open()
@@ -323,6 +369,8 @@ class GameWindow(Screen):
                     if tile == 'vlajka':
                         if self.map.grid[y][x] != 'mine':
                             return False
+                    if tile == 'n':
+                        return False
             return True
         return False
 

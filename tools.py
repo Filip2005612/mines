@@ -21,7 +21,7 @@ neighbours.append(n5)
 neighbours.append(n6)
 neighbours.append(n7)
 neighbours.append(n8)
-def create_tile(x, y, size_x, size_y, text_, sx, sy, color,self,image = '',):
+def create_tile(x, y, size_x, size_y, text_, sx, sy,self,color = '',image = '',):
     
     if image != '':
         r = Rectangle(source = image,pos = (x*sx,y*sy), size = (sx*size_x, sy*size_y))
