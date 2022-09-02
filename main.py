@@ -69,7 +69,7 @@ class W(Popup):
         data = json.load(f)
         f.close()
         self.on_dismiss = self.win
-        score = Label(text = 'Tvoje skóre je: ' + str(GameWindow.time) + '\n' + 'high score je: ' + str(data[self.caller.current_difficulty]), pos_hint = {'x':0.1, 'y':0.5}, size_hint = [0.3, 0.3])
+        score = Label(text = 'Tvoje skóre je: ' + str(GameWindow.time) , pos_hint = {'x':0.1, 'y':0.5}, size_hint = [0.3, 0.3])
         bx.add_widget(score)
         
 
